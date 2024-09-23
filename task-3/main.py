@@ -1,5 +1,7 @@
-from termcolor import colored
 import os
+import sys
+import argparse
+from termcolor import colored
 
 def parse_log_line(line):
     """Парсинг рядка логу."""
@@ -54,29 +56,24 @@ def display_log_counts(counts):
         print(f"{colored(level, color):<15} | {count:<10} {bars}")
 
 def main():
-    print(colored("Ласкаво просимо до програми аналізу лог-файлів!", "cyan"))
+    parser = argparse.ArgumentParser(description="Програма для аналізу лог-файлів.")
+    parser.add_argument("file_path", type=str, help="Шлях до лог-файлу")
+    parser.add_argument("log_level", nargs='?', type=str, help="Рівень логування для фільтрації (INFO, DEBUG, ERROR, WARNING)", default=None)
     
-    while True:
-        file_path = input("Введіть шлях до лог-файлу (або 'exit' для виходу): ")
+    args = parser.parse_args()
 
-        if file_path.lower() == 'exit':
-            print(colored("Програма завершена. До побачення!", "blue"))
-            break
+    # Завантаження логів
+    logs = load_logs(args.file_path)
+    if logs is None:
+        sys.exit()
 
-        logs = load_logs(file_path)
-        if logs is None:
-            continue
+    # Виведення підрахунку логів за рівнями
+    counts = count_logs_by_level(logs)
+    display_log_counts(counts)
 
-        # Виведення кількості записів за рівнями
-        counts = count_logs_by_level(logs)
-        display_log_counts(counts)
-
-        # Фільтрація логів за рівнем (за бажанням користувача)
-        filter_level = input("Введіть рівень логування для фільтрації (INFO, DEBUG, ERROR, WARNING) або 'skip' для пропуску: ").upper()
-
-        if filter_level == 'SKIP':
-            continue
-
+    # Якщо задано рівень логування, фільтруємо лог за рівнем
+    if args.log_level:
+        filter_level = args.log_level.upper()
         filtered_logs = filter_logs_by_level(logs, filter_level)
         if filtered_logs:
             print(colored(f"\nЛоги для рівня '{filter_level}':", "yellow"))
@@ -85,6 +82,6 @@ def main():
         else:
             print(colored(f"Немає записів для рівня '{filter_level}'", "red"))
 
-# Приклад використання скрипту
+# Виклик основної функції
 if __name__ == "__main__":
     main()
