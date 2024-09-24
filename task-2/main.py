@@ -12,7 +12,7 @@ def supports_color():
         return False
     return True
 
-# Функція для виведення кольорового тексту або звичайного, якщо кольори не підтримуються
+# Виведення кольорового тексту або звичайного, якщо кольори не підтримуються
 def print_colored(text, color):
     if supports_color():
         print(colored(text, color))
